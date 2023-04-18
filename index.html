@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Printable CD Jacket</title>
+    <style>
+
+        :root {
+            --container-height: 12.2cm;
+            --container-top: calc((var(--container-height) - var(--hole-center-spacing)) / -2 + var(--hole-center-from-left));
+            --upper-stables-from-top: 2.7cm;
+            --upper-stables-spacing: 12.1cm;
+            --lower-stables-from-top: 8cm;
+            --lower-stables-spacing: 11.3cm;
+            --staple-data-url: url("data:image/svg+xml,%3Csvg width='1mm' height='12mm' viewBox='0 0 1 12' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='m1 8v3.4375c0 0.75-1 0.75-1 0v-10.875c0-0.75 1-0.75 1 0v3.4375' fill='none' stroke='%23000' stroke-width='.2'/%3E%3C/svg%3E");
+            --center-mark-width: 1cm;
+            --hole-diameter: 0.5cm;
+            --hole-center-from-left: 1.2cm;
+            --hole-center-spacing: 8cm;
+            --no-image-data-url: url("data:image/svg+xml,%3Csvg width='100mm' height='75mm' viewBox='0 0 100 75' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='m0 0 0 75h100l0 -75zm5 5h90l0 65h-90z'/%3E%3Cpath d='m10 65 20-20 10 10 20-20 30 30z'/%3E%3Ccircle cx='40' cy='25' r='10'/%3E%3C/svg%3E");
+        }
+
+        html, body {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            width: 100%;
+            user-select: none;
+        }
+
+        a {
+            color: black;
+            text-decoration: none;
+            outline: none;
+        }
+        a:hover, a:active, a:focus-visible {
+            color: dimgray;
+            text-decoration: underline;
+        }
+
+        container {
+            position: absolute;
+            height: var(--container-height);
+            width: 100%;
+            top: var(--container-top);
+        }
+        container:nth-of-type(2) {
+            top: calc(var(--container-height) + var(--container-top));
+        }
+        container:nth-of-type(2) > img, container:nth-of-type(2) > staples {
+            transform: rotate(180deg);
+        }
+        container:nth-of-type(3) {
+            top: calc(var(--container-height) * 2 + var(--container-top));
+            height: var(--container-height);
+        }
+
+        container > img {
+            position: absolute;
+            z-index: 0;
+            height: 100%;
+            width: 100%;
+            object-fit: contain;
+        }
+
+        img:not([src]) {
+            content-visibility: hidden;
+            background-image: var(--no-image-data-url);
+            background-repeat: no-repeat;
+            background-position: center;
+            background-size: auto 25%;
+        }
+
+        center-mark, folding-mark, hole {
+            margin: 0;
+            position: absolute;
+            z-index: 1;
+            border: 0.02cm dashed black;
+            filter: drop-shadow(0 0 0.3px white) drop-shadow(0 0 0.3px white);
+        }
+
+        center-mark {
+            top: 50%;
+            width: var(--center-mark-width);
+            border-bottom: 0;
+        }
+
+        folding-mark {
+            top: 100%;
+            left: 0;
+            right: 0;
+            border-bottom: 0;
+        }
+
+        holes {
+            position: absolute;
+            top: 50%;
+            width: 100%;
+            height: 0;
+        }
+        holes > hole {
+            left: calc(var(--hole-center-from-left) - var(--hole-diameter) / 2);
+            width: var(--hole-diameter);
+            height: var(--hole-diameter);
+            border-radius: var(--hole-diameter);
+        }
+        holes > hole:nth-of-type(1) {
+            top: calc(var(--hole-center-spacing) / -2 - var(--hole-diameter) / 2);
+        }
+        holes > hole:nth-of-type(2) {
+            bottom: calc(var(--hole-center-spacing) / -2 - var(--hole-diameter) / 2);
+        }
+
+        staples {
+            position: absolute;
+            left: 50%;
+            width: 0;
+            height: 100%;
+        }
+        staples > staple {
+            position: absolute;
+            z-index: 1;
+            height: 1.2cm;
+            width: 0.1cm;
+        }
+        staples > staple::before {
+            content: var(--staple-data-url);
+            filter: drop-shadow(0 0 0.3px white) drop-shadow(0 0 0.3px white);
+        }
+        staples > staple:nth-of-type(1) {
+            top: var(--upper-stables-from-top);
+            left: calc(var(--upper-stables-spacing) / -2 - 0.1cm);
+        }
+        staples > staple:nth-of-type(2) {
+            top: var(--upper-stables-from-top);
+            right: calc(var(--upper-stables-spacing) / -2 - 0.1cm);
+            transform: rotate(180deg);
+        }
+        staples > staple:nth-of-type(3) {
+            top: var(--lower-stables-from-top);
+            left: calc(var(--lower-stables-spacing) / -2 - 0.1cm);
+        }
+        staples > staple:nth-of-type(4) {
+            top: var(--lower-stables-from-top);
+            right: calc(var(--lower-stables-spacing) / -2 - 0.1cm);
+            transform: rotate(180deg);
+        }
+
+        ui {
+            position: fixed;
+            top: var(--hole-center-from-left);
+            left: var(--hole-center-from-left);
+            z-index: 10;
+            background-color: Beige;
+            border-style: solid;
+            border-width: 5px;
+            border-color: MediumSeaGreen;
+            border-radius: 20px;
+            transition: opacity 75ms linear;
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 17.5px;
+            line-height: 20px;
+        }
+        ui > titlebar {
+            display: block;
+            background-color: MediumSeaGreen;
+            padding: 5px 10px;
+            margin: 5px;
+            border-radius: 10px;
+            cursor: grab;
+            font-weight: bold;
+            text-align: center;
+        }
+        ui > element {
+            display: block;
+            padding: 8px 12px;
+            border: 0;
+            border-top: 1px;
+            border-style: solid;
+            border-image: linear-gradient(to right, Beige 5%, gray 25%, gray 75%, Beige 95%) 5;
+        }
+        ui > element:first-of-type {
+            border-top: 0;
+        }
+
+        ui > element > input, ui > element > input + label {
+            cursor: pointer;
+        }
+
+        ui > element > input:hover + label, ui > element > input:active + label, ui > element > input:focus-visible + label {
+            text-shadow: 0 0 1px black;
+            opacity: 0.75;
+            transition: 150ms linear;
+        }
+
+        ui > element > input[type=file], ui > element > input[type=checkbox] {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            opacity: 0;
+            overflow: hidden;
+            z-index: -1;
+        }
+
+        ui > element > label[for=file] {
+            display: block;
+            text-align: center;
+        }
+        ui > element > label[for=file] > img {
+            display: block;
+            width: 300px;
+            height: 150px;
+            object-fit: contain;
+            margin: auto;
+        }
+
+        ui > element > input[type=range] {
+            appearance: none;
+            outline: none;
+            width: calc(100% - 2px * 2 - 45px - 12px);
+            height: 10px;
+            margin: 8px 0 2px 0;
+            cursor: pointer;
+            background-color: Beige;
+            border-style: solid;
+            border-width: 2px;
+            border-color: MediumSeaGreen;
+            border-radius: 7.5px;
+        }
+        ui > element > input[type="range"]::-webkit-slider-thumb {
+            appearance: none;
+            width: 24px;
+            height: 24px;
+            background-color: MediumSeaGreen;
+            border-radius: 7.5px;
+        }
+        ui > element > input[type="range"]::before {
+            display: block;
+            position: absolute;
+            left: calc(100% - 45px - 12px);
+            width: 45px;
+            text-align: right;
+            content: attr(data-value);
+            font-size: 17.5px;
+            margin: -5px 0;
+        }
+        ui > element > input[type=range]:hover, ui > element > input[type=range]:active, ui > element > input[type=range]:focus-visible, ui > element > input[type=range]:hover::-webkit-slider-thumb, ui > element > input[type=range]:active::-webkit-slider-thumb, ui > element > input[type=range]:focus-visible::-webkit-slider-thumb {
+            box-shadow: 0 0 5px MediumSeaGreen;
+        }
+
+        ui > element > input[type=checkbox] + label::before {
+            content: "✔";
+            display: inline-block;
+            padding: 0 3px 0 3px;
+            margin: -2px 6px -2px 0;
+            color: Beige;
+            background-color: Beige;
+            border-style: solid;
+            border-width: 2px;
+            border-color: MediumSeaGreen;
+            border-radius: 7.5px;
+            transition: 150ms linear;
+        }
+        ui > element > input[type=checkbox]:checked + label::before {
+            color: MediumSeaGreen;
+        }
+        ui > element > input[type=checkbox]:hover + label::before, ui > element > input[type=checkbox]:active + label::before, ui > element > input[type=checkbox]:focus-visible + label::before {
+            text-shadow: 0 0 5px MediumSeaGreen;
+            box-shadow: 0 0 2.5px MediumSeaGreen;
+        }
+
+        ui > element > input[type=button] {
+            outline: none;
+            height: 28px;
+            width: 100%;
+            font-size: 17.5px;
+            font-weight: bold;
+            color: MediumSeaGreen;
+            background-color: Beige;
+            border-style: solid;
+            border-width: 2px;
+            border-color: MediumSeaGreen;
+            border-radius: 7.5px;
+        }
+        ui > element > input[type=button]:hover, ui > element > input[type=button]:active, ui > element > input[type=button]:focus-visible {
+            text-shadow: 0 0 1px MediumSeaGreen;
+            box-shadow: 0 0 2.5px MediumSeaGreen;
+        }
+
+        @media print {
+
+            @page {
+                margin: 0;
+                size: portrait;
+            }
+
+            html, body {
+                position: relative;
+                height: 100%;
+                width: 100%;
+                overflow: hidden;
+            }
+
+            ui {
+                display: none;
+            }
+        }
+    </style>
+  </head>
+  <body>
+    <container>
+        <img>
+        <holes>
+            <hole></hole>
+            <center-mark></center-mark>
+            <hole></hole>
+        </holes>
+        <folding-mark></folding-mark>
+        <staples>
+            <staple></staple>
+            <staple></staple>
+            <staple></staple>
+            <staple></staple>
+        </staples>
+    </container>
+    <container>
+        <img>
+        <holes>
+            <hole></hole>
+            <center-mark></center-mark>
+            <hole></hole>
+        </holes>
+        <folding-mark></folding-mark>
+        <staples>
+            <staple></staple>
+            <staple></staple>
+            <staple></staple>
+            <staple></staple>
+        </staples>
+    </container>
+    <container>
+        <img>
+    </container>
+    <ui>
+        <titlebar>Printable CD Jacket</titlebar>
+        <element>
+            <input id="file" type="file" accept="image/*">
+            <label for="file"><img>Click the <b>image</b> to change it</label>
+        </element>
+        <element>
+            <label for="brightness">Change <b>brightness</b> of the image</label><br>
+            <input id="brightness" type="range" min="0" max="2" step="0.01">
+        </element>
+        <element>
+            <label for="contrast">Change <b>contrast</b> of the image</label><br>
+            <input id="contrast" type="range" min="0" max="2" step="0.01">
+        </element>
+        <element>
+            <input id="invert" type="checkbox">
+            <label for="invert"><b>Invert</b> the image</label>
+        </element>
+        <element>
+            <input id="grayscale" type="checkbox">
+            <label for="grayscale">Make image <b>grayscale</b></label>
+        </element>
+        <element>
+            <input id="holes" type="checkbox" checked>
+            <label for="holes">Add <a href="https://en.wikipedia.org/wiki/Hole_punch#ISO_838">ISO 838</a> hole punch templates</label>
+        </element>
+        <element>
+            <input id="print" type="button" value="Print">
+        </element>
+    </ui>
+    <script>
+
+        const htmlElement = document.querySelector('html')
+        const imgElements = document.querySelectorAll('img')
+        const holesElements = document.querySelectorAll('holes')
+        const uiElement = document.querySelector('ui')
+        const titlebarElement = document.querySelector('ui > titlebar')
+        const elementElements = document.querySelectorAll('ui > element')
+        const printButtonElement = document.querySelector('input#print')
+        const notTypeButtonInputElements = document.querySelectorAll('ui > element > input:not([type="button"])')
+
+        localStorage.getItem('uiPositionTop') === null ? localStorage.setItem('uiPositionTop', uiElement.offsetTop) : null
+        localStorage.getItem('uiPositionLeft') === null ? localStorage.setItem('uiPositionLeft', uiElement.offsetLeft) : null
+        localStorage.getItem('file') === null ? localStorage.setItem('file', false) : null
+        localStorage.getItem('invert') === null ? localStorage.setItem('invert', false) : null
+        localStorage.getItem('grayscale') === null ? localStorage.setItem('grayscale', false) : null
+        localStorage.getItem('brightness') === null ? localStorage.setItem('brightness', 1) : null
+        localStorage.getItem('contrast') === null ? localStorage.setItem('contrast', 1) : null
+        localStorage.getItem('holes') === null ? localStorage.setItem('holes', true) : null
+
+        printButtonElement.addEventListener('click', function() {
+            window.print()
+        })
+
+        for (const element of notTypeButtonInputElements) {
+            element.addEventListener('input', validate)
+        }
+
+        update()
+
+        function validate(event) {
+            switch (event.target.type) {
+                case 'file':
+                    if (event.target.files && event.target.files[0]) {
+                        let filereader = new FileReader()
+                        filereader.onload = function (event) {
+                            localStorage.setItem('file', event.target.result)
+                            update()
+                        }
+                        filereader.readAsDataURL(event.target.files[0])
+                    }
+                    break
+
+                case 'checkbox':
+                    localStorage.setItem(event.target.id, event.target.checked)
+                    break
+
+                case 'range':
+                    localStorage.setItem(event.target.id, event.target.value)
+                    break
+
+                default:
+                    console.log(`No case for event.target.type '${event.target.type}'.`)
+            }
+
+            update()
+        }
+
+        function update() {
+            for (const element of notTypeButtonInputElements) {
+                switch (element.type) {
+                    case 'file':
+                        break
+
+                    case 'checkbox':
+                        element.checked = (localStorage.getItem(element.id) === 'true' )
+                        break
+
+                    case 'range':
+                        element.value = localStorage.getItem(element.id)
+                        element.setAttribute('data-value', `${Math.round(element.value * 100)}%`)
+                        break
+
+                    default:
+                        console.log(`No case for input.type '${element.type}'.`)
+                }
+            }
+
+            const brightness = `${localStorage.getItem('brightness') != 1 ? 'brightness( ' + localStorage.getItem('brightness') + ')' : ''}`
+            const contrast = `${localStorage.getItem('contrast') != 1 ? 'contrast( ' + localStorage.getItem('contrast') + ')' : ''}`
+            const invert = `${(localStorage.getItem('invert') === 'true') ? 'invert() ' : ''}`
+            const grayscale = `${(localStorage.getItem('grayscale') === 'true') ? 'grayscale() ' : ''}`
+
+            uiElement.style.filter = invert + grayscale
+
+            if (localStorage.getItem('file') !== 'false') {
+                for (const element of imgElements) {
+                    element.src = localStorage.getItem('file')
+                    if (uiElement.contains(element)) {
+                        element.style.filter = brightness + contrast
+                    } else {
+                        element.style.filter = brightness + contrast + invert + grayscale
+                    }
+                }
+            }
+            for (const element of holesElements) {
+                element.style.display = `${(localStorage.getItem('holes') !== 'true') ? 'none' : ''}`
+            }
+
+            validateAndUpdateUiPosition(localStorage.getItem('uiPositionTop'), localStorage.getItem('uiPositionLeft'))
+        }
+
+        function startUiMovement(event) {
+            if (event.buttons == 1) {
+                document.addEventListener('mousemove', moveUiPosition)
+                document.addEventListener('mouseup', stopUiMovement)
+
+                titlebarElement.style.cursor = 'grabbing'
+                titlebarElement.parentElement.style.opacity = 0.75
+            }
+        }
+
+        function moveUiPosition (event) {
+            const newTop = titlebarElement.parentElement.offsetTop + event.movementY
+            const newLeft = titlebarElement.parentElement.offsetLeft + event.movementX
+
+            if (validateAndUpdateUiPosition(newTop, newLeft)) {
+                console.log(newTop, newLeft)
+                localStorage.setItem('uiPositionTop', newTop)
+                localStorage.setItem('uiPositionLeft', newLeft)
+            } else if (event.target != titlebarElement) {
+                stopUiMovement(event)
+            }
+        }
+
+        function validateAndUpdateUiPosition(top, left) {
+            let newTop = top;
+            if (newTop < 0) {
+                newTop = 0
+            }
+            if (newTop >= htmlElement.clientHeight - titlebarElement.parentElement.offsetHeight) {
+                newTop = htmlElement.clientHeight - titlebarElement.parentElement.offsetHeight - 1
+            }
+
+            let newLeft = left;
+            if (newLeft < 0) {
+                newLeft = 0
+            }
+            if (newLeft >= htmlElement.clientWidth - titlebarElement.parentElement.offsetWidth) {
+                newLeft = htmlElement.clientWidth - titlebarElement.parentElement.offsetWidth - 1
+            }
+
+            titlebarElement.parentElement.style.top = `${newTop}px`
+            titlebarElement.parentElement.style.left = `${newLeft}px`
+
+            return top == newTop && left == newLeft
+        }
+
+        function stopUiMovement() {
+            document.removeEventListener('mousemove', moveUiPosition)
+            document.removeEventListener('mouseup', stopUiMovement)
+
+            titlebarElement.style.cursor = ''
+            titlebarElement.parentElement.style.opacity = null
+        }
+
+        titlebarElement.addEventListener('mousedown', startUiMovement)
+
+    </script>
+    </body>
+</html>
+
+<!--
+ToDo:
+    * White Picker
+-->
