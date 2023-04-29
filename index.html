@@ -149,8 +149,8 @@
 
         ui {
             position: fixed;
-            top: var(--hole-center-from-left);
-            left: var(--hole-center-from-left);
+            top: 15px;
+            left: 15px;
             z-index: 10;
             background-color: Beige;
             border-style: solid;
@@ -235,17 +235,28 @@
             background-color: MediumSeaGreen;
             border-radius: 7.5px;
         }
+        ui > element > input[type="range"]::-moz-range-thumb {
+            width: 24px;
+            height: 24px;
+            background-color: MediumSeaGreen;
+            border-radius: 7.5px;
+            border-width: 0;
+        }
         ui > element > input[type="range"]::before {
             display: block;
             position: absolute;
             left: calc(100% - 45px - 12px);
             width: 45px;
             text-align: right;
-            content: attr(data-value);
+            content: attr(data-value)'%';
             font-size: 17.5px;
             margin: -5px 0;
+            color: black;
         }
         ui > element > input[type=range]:hover, ui > element > input[type=range]:active, ui > element > input[type=range]:focus-visible, ui > element > input[type=range]:hover::-webkit-slider-thumb, ui > element > input[type=range]:active::-webkit-slider-thumb, ui > element > input[type=range]:focus-visible::-webkit-slider-thumb {
+            box-shadow: 0 0 5px MediumSeaGreen;
+        }
+        ui > element > input[type=range]:hover::-moz-range-thumb, ui > element > input[type=range]:active::-moz-range-thumb, ui > element > input[type=range]:focus-visible::-moz-range-thumb {
             box-shadow: 0 0 5px MediumSeaGreen;
         }
 
@@ -392,6 +403,8 @@
         localStorage.getItem('contrast') === null ? localStorage.setItem('contrast', 1) : null
         localStorage.getItem('holes') === null ? localStorage.setItem('holes', true) : null
 
+        let file = localStorage.getItem('file')
+
         printButtonElement.addEventListener('click', function() {
             window.print()
         })
@@ -408,7 +421,12 @@
                     if (event.target.files && event.target.files[0]) {
                         let filereader = new FileReader()
                         filereader.onload = function (event) {
-                            localStorage.setItem('file', event.target.result)
+                            try {
+                                localStorage.setItem('file', event.target.result)
+                            } catch (error) {
+                                console.error(error)
+                            }
+                            file = event.target.result
                             update()
                         }
                         filereader.readAsDataURL(event.target.files[0])
@@ -442,7 +460,7 @@
 
                     case 'range':
                         element.value = localStorage.getItem(element.id)
-                        element.setAttribute('data-value', `${Math.round(element.value * 100)}%`)
+                        element.setAttribute('data-value', Math.round(element.value * 100))
                         break
 
                     default:
@@ -457,9 +475,9 @@
 
             uiElement.style.filter = invert + grayscale
 
-            if (localStorage.getItem('file') !== 'false') {
+            if (file !== 'false') {
                 for (const element of imgElements) {
-                    element.src = localStorage.getItem('file')
+                    element.src = file
                     if (uiElement.contains(element)) {
                         element.style.filter = brightness + contrast
                     } else {
@@ -489,7 +507,6 @@
             const newLeft = titlebarElement.parentElement.offsetLeft + event.movementX
 
             if (validateAndUpdateUiPosition(newTop, newLeft)) {
-                console.log(newTop, newLeft)
                 localStorage.setItem('uiPositionTop', newTop)
                 localStorage.setItem('uiPositionLeft', newLeft)
             } else if (event.target != titlebarElement) {
@@ -536,5 +553,10 @@
 
 <!--
 ToDo:
-    * White Picker
+    * Functions:
+        * White Picker
+        * Progressive Web App
+    * Firefox
+        * Silder do not have ::before that shows percentage
+            * Seems like only Webkit browsers support ::before for input tags :-(
 -->
