@@ -394,17 +394,6 @@
         const printButtonElement = document.querySelector('input#print')
         const notTypeButtonInputElements = document.querySelectorAll('ui > element > input:not([type="button"])')
 
-        localStorage.getItem('uiPositionTop') === null ? localStorage.setItem('uiPositionTop', uiElement.offsetTop) : null
-        localStorage.getItem('uiPositionLeft') === null ? localStorage.setItem('uiPositionLeft', uiElement.offsetLeft) : null
-        localStorage.getItem('file') === null ? localStorage.setItem('file', false) : null
-        localStorage.getItem('invert') === null ? localStorage.setItem('invert', false) : null
-        localStorage.getItem('grayscale') === null ? localStorage.setItem('grayscale', false) : null
-        localStorage.getItem('brightness') === null ? localStorage.setItem('brightness', 1) : null
-        localStorage.getItem('contrast') === null ? localStorage.setItem('contrast', 1) : null
-        localStorage.getItem('holes') === null ? localStorage.setItem('holes', true) : null
-
-        let file = localStorage.getItem('file')
-
         printButtonElement.addEventListener('click', function() {
             window.print()
         })
@@ -415,18 +404,95 @@
 
         update()
 
+        function setItem(key, value) {
+            try {
+                localStorage.setItem(key, value)
+                return
+            } catch (error) {
+                console.warn(error)
+            }
+
+            try {
+                sessionStorage.setItem(key, value)
+                return
+            } catch (error) {
+                console.warn(error)
+            }
+
+            if (typeof(window.items) !== 'object') {
+                window.items = {}
+            }
+
+            // String() to have similar behavior as with the Web Storage API
+            window.items[key] = String(value)
+        }
+
+        function getItem(key) {
+            let item
+
+            try {
+                item = window.items[key]
+
+                if (item !== undefined) {
+                    return item
+                }
+            } catch {}
+
+            item = sessionStorage.getItem(key)
+
+            if (item !== null) {
+                if (item === 'true') {
+                    return true
+                }
+
+                if (item === 'false') {
+                    return false
+                }
+
+                return item
+            }
+
+            item = localStorage.getItem(key)
+
+            if (item !== null) {
+                if (item === 'true') {
+                    return true
+                }
+
+                if (item === 'false') {
+                    return false
+                }
+
+                return item
+            }
+
+            switch(key) {
+                case 'uiPositionTop':
+                    return uiElement.offsetTop
+
+                case 'uiPositionLeft':
+                    return uiElement.offsetLeft
+
+                case 'invert':
+                case 'grayscale':
+                    return false
+
+                case 'holes':
+                    return true
+
+                case 'brightness':
+                case 'contrast':
+                    return 1
+            }
+        }
+
         function validate(event) {
             switch (event.target.type) {
                 case 'file':
                     if (event.target.files && event.target.files[0]) {
                         let filereader = new FileReader()
                         filereader.onload = function (event) {
-                            try {
-                                localStorage.setItem('file', event.target.result)
-                            } catch (error) {
-                                console.error(error)
-                            }
-                            file = event.target.result
+                            setItem('file', event.target.result)
                             update()
                         }
                         filereader.readAsDataURL(event.target.files[0])
@@ -434,11 +500,11 @@
                     break
 
                 case 'checkbox':
-                    localStorage.setItem(event.target.id, event.target.checked)
+                    setItem(event.target.id, event.target.checked)
                     break
 
                 case 'range':
-                    localStorage.setItem(event.target.id, event.target.value)
+                    setItem(event.target.id, event.target.value)
                     break
 
                 default:
@@ -455,11 +521,11 @@
                         break
 
                     case 'checkbox':
-                        element.checked = (localStorage.getItem(element.id) === 'true' )
+                        element.checked = getItem(element.id)
                         break
 
                     case 'range':
-                        element.value = localStorage.getItem(element.id)
+                        element.value = getItem(element.id)
                         element.setAttribute('data-value', Math.round(element.value * 100))
                         break
 
@@ -468,16 +534,16 @@
                 }
             }
 
-            const brightness = `${localStorage.getItem('brightness') != 1 ? 'brightness( ' + localStorage.getItem('brightness') + ')' : ''}`
-            const contrast = `${localStorage.getItem('contrast') != 1 ? 'contrast( ' + localStorage.getItem('contrast') + ')' : ''}`
-            const invert = `${(localStorage.getItem('invert') === 'true') ? 'invert() ' : ''}`
-            const grayscale = `${(localStorage.getItem('grayscale') === 'true') ? 'grayscale() ' : ''}`
+            const brightness = `${getItem('brightness') != 1 ? 'brightness( ' + getItem('brightness') + ')' : ''}`
+            const contrast = `${getItem('contrast') != 1 ? 'contrast( ' + getItem('contrast') + ')' : ''}`
+            const invert = `${getItem('invert') ? 'invert() ' : ''}`
+            const grayscale = `${getItem('grayscale') ? 'grayscale() ' : ''}`
 
             uiElement.style.filter = invert + grayscale
 
-            if (file !== 'false') {
+            if (getItem('file') !== undefined) {
                 for (const element of imgElements) {
-                    element.src = file
+                    element.src = getItem('file')
                     if (uiElement.contains(element)) {
                         element.style.filter = brightness + contrast
                     } else {
@@ -486,10 +552,10 @@
                 }
             }
             for (const element of holesElements) {
-                element.style.display = `${(localStorage.getItem('holes') !== 'true') ? 'none' : ''}`
+                element.style.display = `${getItem('holes') ? '' : 'none'}`
             }
 
-            validateAndUpdateUiPosition(localStorage.getItem('uiPositionTop'), localStorage.getItem('uiPositionLeft'))
+            validateAndUpdateUiPosition(getItem('uiPositionTop'), getItem('uiPositionLeft'))
         }
 
         function startUiMovement(event) {
@@ -507,8 +573,8 @@
             const newLeft = titlebarElement.parentElement.offsetLeft + event.movementX
 
             if (validateAndUpdateUiPosition(newTop, newLeft)) {
-                localStorage.setItem('uiPositionTop', newTop)
-                localStorage.setItem('uiPositionLeft', newLeft)
+                setItem('uiPositionTop', newTop)
+                setItem('uiPositionLeft', newLeft)
             } else if (event.target != titlebarElement) {
                 stopUiMovement(event)
             }
